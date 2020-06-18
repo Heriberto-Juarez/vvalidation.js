@@ -26,7 +26,7 @@ class HForm {
         this.allowedFileTypes = "image/*";
         this.hasModal = true;
         this.modal = document.getElementById("HFormModal");
-        this.valid = true;
+        this.isValid = true;
         settings = settings || {};
         for (let key in settings) this[key] = settings[key]; //assign settings to HForm object
         this.validate();
@@ -36,20 +36,13 @@ class HForm {
         const inputs = this.form.querySelectorAll('[data-hfrules]')
 
         inputs.forEach((el) => {
-            let value = '';
             const nodeName = el.nodeName;
-
-            if (nodeName === 'select')
-                value = el.options[el.selectedIndex].value;
-            else
-                value = el.value;
-
-
             const rules = el.getAttribute('data-hfrules').split('|');
+            let value = nodeName === 'select' ? el.options[el.selectedIndex].value : el.value;
 
             for (let index in rules) {
                 const rule = rules[index].toLowerCase();
-                if (rule !== 'permit_empty') {
+                if (rule !== 'permit_empty' && rule !== 'required') {
 
                     /**
                      * If regex is min_length or max_length get parameter and validate
@@ -67,23 +60,35 @@ class HForm {
                         const parameterValue = parametersRegex.exec(rule)[0];
                         if(parameterValue.match(new RegExp(rulesPack['integer']))){
                             if(type === 'min')
-                                if(value.length < parameterValue) this.valid = false;
+                                if(value.length < parameterValue) this.isValid = false;
                                 else
-                                if(value.length > parameterValue) this.valid = false;
+                                if(value.length > parameterValue) this.isValid = false;
                         }else
                             throw new Error(`${type}_length's parameter must be an integer`);
                     }else {
-
                         /**
                          * The rule is not a length check. Let's try finding the rule in rulesPack object
                          * */
-
-
-
+                        if(rulesPack.hasOwnProperty(rule)){
+                            /**
+                             * rule exists, so we create a new Regex and check if it matches the input value.
+                             * If the regex does not match the value we assign isValid to false;
+                             * */
+                            if(!(new RegExp(rulesPack[rule]).test(value))){
+                                this.isValid = false;
+                            }
+                        }
                     }
 
                 } else if (rule === 'permit_empty' && value.length < 1) {
-                    this.valid = true;
+                    this.isValid = true;
+                } else if (rule === 'required'){
+                    /**
+                     * If the rule indicates an element is required we must check if the value is empty
+                     * But if the input is of type file then we should check the
+                     * */
+                    if(el.getAttribute("type") === 'file' && el.files.length < 1 || value.length < 1)
+                        this.isValid = false;
                 }
 
             }
