@@ -13,7 +13,28 @@ const rulesPack = {
 };
 
 const errors = {
-    'alpha': 'Ingrese únicamente caracteres alfabéticos y sin espacio.'
+    'es':{
+        'alpha': 'Ingrese únicamente valores alfabéticos sin espacios',
+        'alpha_space': 'Ingrese únicamente valores alfabéticos y espacios',
+        'alpha_dash': 'Ingrese únicamente valores alfabéticos y guiones',
+        'alpha_numeric': 'Ingrese únicamente valores alfabéticos y numéricos sin espacio',
+        'alpha_numeric_space': 'Ingrese únicamente valores alfabéticos, numéricos y espacios',
+        'alpha_numeric_punct': 'Ingrese únicamente valores alfabéticos, numéricos y los siguientes signos de puntuación: ~ ! # $ % & * - _ + = | : .',
+        'decimal': 'Ingrese únicamente valores decimales',
+        'hexadecimal': 'Ingrese únicamente valores hexadecimales',
+        'integer': 'Ingrese únicamente valores enteros',
+    },
+    'en': {
+        'alpha': 'Enter alphabetic values only (without spaces)',
+        'alpha_space': 'Enter alphabetic values and spaces only',
+        'alpha_dash': 'Enter alphabetic values and dashes only',
+        'alpha_numeric': 'Enter alphabetic and numeric values only',
+        'alpha_numeric_space': 'Enter alphabetic, numeric, and spaces values only',
+        'alpha_numeric_punct': 'Enter alphabetic and numeric values, and the following symbols: ~ ! # $ % & * - _ + = | : . only',
+        'decimal': 'Enter decimal values only',
+        'hexadecimal': 'Enter hexadecimal values only',
+        'integer': 'Enter integer values only',
+    },
 };
 
 const parametersRegex = new RegExp(/(?<=\[).+?(?=\])/);
@@ -23,10 +44,17 @@ class HFormValidation {
 
     constructor(id, settings) {
         this.form = document.getElementById(id);
+
+        this.submitBtn = this.form.querySelector("input[type='submit']");
+        if(this.submitBtn === null){
+            this.submitBtn = this.form.querySelector('[data-submit]');
+        }
         this.allowedFileTypes = "image/*";
         this.hasModal = true;
         this.modal = document.getElementById("HFormModal");
         this.isValid = true;
+        this.lang = 'en';
+        this.handleFormSubmition = true;
         settings = settings || {};
         for (let key in settings) this[key] = settings[key]; //assign settings to HForm object
         this.validate();
@@ -99,5 +127,18 @@ class HFormValidation {
 
             }
         });
+
+        if(this.submitBtn){
+            if(this.isValid){
+                this.submitBtn.attributes.removeNamedItem('disabled');
+            }else{
+                this.submitBtn.attributes.disabled = "disabled";
+            }
+        }else {
+            throw new Error('Could not find submit button, if you have something different than <input type="submit"> specify your input with data-submit attribute: <button data-submit>Submit</button>');
+        }
+
     }
+
+
 }
