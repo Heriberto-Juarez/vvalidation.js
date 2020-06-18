@@ -48,8 +48,8 @@ class HForm {
                      * If regex is min_length or max_length get parameter and validate
                      **/
 
-                    let minRegex = new RegExp(/^max_length/);
-                    let maxRegex = new RegExp(/^min_length/);
+                    let minRegex = new RegExp(/^min_length/);
+                    let maxRegex = new RegExp(/^max_length/);
                     let type = '';
                     if(rule.match(minRegex))
                         type = 'min';
@@ -57,7 +57,12 @@ class HForm {
                         type = 'max';
 
                     if (type !== '') {
-                        const parameterValue = parametersRegex.exec(rule)[0];
+                        let parameterValue = '';
+                        try {
+                            parameterValue = parametersRegex.exec(rule)[0];
+                        }catch (e) {
+                            throw new Error(`The ${type}_length's parameter could not be read. Please check you are using the following syntax: ${type}_length[INTEGER_VALUE]`);
+                        }
                         if(parameterValue.match(new RegExp(rulesPack['integer']))){
                             if(type === 'min')
                                 if(value.length < parameterValue) this.isValid = false;
@@ -65,6 +70,7 @@ class HForm {
                                 if(value.length > parameterValue) this.isValid = false;
                         }else
                             throw new Error(`${type}_length's parameter must be an integer`);
+
                     }else {
                         /**
                          * The rule is not a length check. Let's try finding the rule in rulesPack object
