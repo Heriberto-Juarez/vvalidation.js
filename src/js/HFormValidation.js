@@ -19,7 +19,7 @@ const errors = {
 const parametersRegex = new RegExp(/(?<=\[).+?(?=\])/);
 
 
-class HForm {
+class HFormValidation {
 
     constructor(id, settings) {
         this.form = document.getElementById(id);
