@@ -84,8 +84,9 @@ class HFormValidation {
         });
     }
 
-    validateAndUpdate(el){
-        this.validateElement(el);
+    validateAndUpdate(el, displayMessages){
+        displayMessages = displayMessages || true;
+        this.validateElement(el, displayMessages);
         this.toggleSubmitButton();
     }
 
@@ -93,19 +94,19 @@ class HFormValidation {
     validateAll() {
         const inputs = this.form.querySelectorAll('[data-hfrules]')
         inputs.forEach((el) => {
-            el.dataset.hfvid = "true";
+            el.dataset.hfvid = "1";
             this.validateElement(el);
             this.observe(el);
         });
         this.toggleSubmitButton();
     }
 
-    validateElement(el) {
+    validateElement(el, displayMessages) {
+        displayMessages = displayMessages || true;
         this.isValid = true;
         const nodeName = el.nodeName;
         const rules = el.getAttribute('data-hfrules').split('|');
         let value = nodeName === 'select' ? el.options[el.selectedIndex].value : el.value;
-
         for (let index in rules) {
             const rule = rules[index].toLowerCase();
             if (rule !== 'permit_empty' && rule !== 'required') {
@@ -171,28 +172,25 @@ class HFormValidation {
 
             }
         }
-        el.dataset.hfvid = this.isValid.toString();
+        el.dataset.hfvid = (this.isValid) ? "1" : "0";
     }
     /*
     * Checks event
     * */
     toggleSubmitButton() {
         if (this.submitBtn) {
-
             const inputs = this.form.querySelectorAll('[data-hfrules]');
             let isEnabled = true;
             inputs.forEach((el) => {
-                if(el.dataset.hfvid === "false"){
+                if(el.dataset.hfvid === "0"){
                     isEnabled = false;
                 }
             });
-
             if(isEnabled){
                 this.submitBtn.removeAttribute("disabled");
             }else{
                 this.submitBtn.setAttribute("disabled", "disabled");
             }
-
         } else {
             throw new Error('Could not find submit button, if you have something different than <input type="submit"> specify your input with data-submit attribute: <button data-submit>Submit</button>');
         }
@@ -204,22 +202,23 @@ class HFormValidation {
     observe(el){
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if (mutation.type === "attributes") {
+                if (mutation.type === "attributes" && mutation.attributeName === 'data-hfvid') {
                     /**
-                     * Attributes changed
+                     * data-hfvid attribute has changed
+                     * To prevent other values different than 0 or 1 and manual manipulations we should make sure the next steps are true
+                     * 1. Value is 0 or 1
+                     * 2. this.isValid parsed to string (1 or 0) should be equal to data-hfvid because that is the validation state of the current element
+                     * Step 2 makes sure that the user tries to change data-hfvid from false to true
                      * */
-
                     const val = el.dataset.hfvid;
-                    //If attribute is not true or false it has been modified externally or something wrong happend
-                    //So we set it to false
-                    if(val !== "true" && val !== "false"){
-                        el.dataset.hfvid = "false";
+                    const isValidString = this.isValid ? "1" : "0";
+                    if(val !== "0" && val !== "1" || (isValidString !== val)){
+                        el.dataset.hfvid = "0";
                         this.validateAndUpdate(el);
                     }
                 }
             });
         });
-
         observer.observe(el, {
             attributes: true //configure it to listen to attribute changes
         });
