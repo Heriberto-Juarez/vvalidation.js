@@ -14,18 +14,21 @@ const rulesPack = {
 
 const errors = {
     'es': {
-        'alpha': 'Ingrese únicamente valores alfabéticos sin espacios',
+        'alpha': 'Ingrese únicamente valores alfabéticos',
         'alpha_space': 'Ingrese únicamente valores alfabéticos y espacios',
         'alpha_dash': 'Ingrese únicamente valores alfabéticos y guiones',
-        'alpha_numeric': 'Ingrese únicamente valores alfabéticos y numéricos sin espacio',
+        'alpha_numeric': 'Ingrese únicamente valores alfabéticos y numéricos',
         'alpha_numeric_space': 'Ingrese únicamente valores alfabéticos, numéricos y espacios',
         'alpha_numeric_punct': 'Ingrese únicamente valores alfabéticos, numéricos y los siguientes signos de puntuación: ~ ! # $ % & * - _ + = | : .',
         'decimal': 'Ingrese únicamente valores decimales',
         'hexadecimal': 'Ingrese únicamente valores hexadecimales',
         'integer': 'Ingrese únicamente valores enteros',
+        'min_length': 'Ingrese al menos {0} caracteres',
+        'max_length': 'Ingrese como máximo {0} caracteres',
+        'required': 'Este campo es requerido'
     },
     'en': {
-        'alpha': 'Enter alphabetic values only (without spaces)',
+        'alpha': 'Enter alphabetic values only',
         'alpha_space': 'Enter alphabetic values and spaces only',
         'alpha_dash': 'Enter alphabetic values and dashes only',
         'alpha_numeric': 'Enter alphabetic and numeric values only',
@@ -34,6 +37,9 @@ const errors = {
         'decimal': 'Enter decimal values only',
         'hexadecimal': 'Enter hexadecimal values only',
         'integer': 'Enter integer values only',
+        'min_length': 'Enter at least {0} characters',
+        'max_length': 'Enter maximum {0} characters',
+        'required': 'This field is required'
     },
 };
 
@@ -53,14 +59,19 @@ class HFormValidation {
         this.isValid = true;
         this.lang = 'en';
         this.handleFormSubmition = true;
-        this.typingSeconds = 1;
+        this.typingSeconds = 0.50;
         settings = settings || {};
         for (let key in settings) this[key] = settings[key]; //assign settings to HForm object
-        this.validateAll();
+        this.validateAll(false);
         this.attachEventHandlers();
     }
 
     attachEventHandlers() {
+
+        this.form.addEventListener("submit", function (e) {
+            e.preventDefault();
+        });
+
         const inputs = this.form.querySelectorAll('[data-hfrules]');
         inputs.forEach((el) => {
             this.isValid = true;
@@ -82,27 +93,42 @@ class HFormValidation {
                 });
             }
         });
+        this.submitBtn.addEventListener("click", () => {
+            console.log("Clic");
+            if(this.submitBtn.style.opacity === "0.65"){
+                this.validateAll(true);
+            }
+        });
     }
 
-    validateAndUpdate(el, displayMessages){
-        displayMessages = displayMessages || true;
+    validateAndUpdate(el, displayMessages) {
+        console.log("Validate element");
+        if(displayMessages === null || displayMessages === undefined){
+            displayMessages = true;
+        }
         this.validateElement(el, displayMessages);
         this.toggleSubmitButton();
     }
 
 
-    validateAll() {
+    validateAll(displayMessages) {
+        if(displayMessages === null || displayMessages === undefined){
+            displayMessages = true;
+        }
         const inputs = this.form.querySelectorAll('[data-hfrules]')
         inputs.forEach((el) => {
             el.dataset.hfvid = "1";
-            this.validateElement(el);
+            this.validateElement(el, displayMessages);
             this.observe(el);
         });
         this.toggleSubmitButton();
     }
 
     validateElement(el, displayMessages) {
-        displayMessages = displayMessages || true;
+        this.removeMessage(el);
+        if(displayMessages === null || displayMessages === undefined){
+            displayMessages = true;
+        }
         this.isValid = true;
         const nodeName = el.nodeName;
         const rules = el.getAttribute('data-hfrules').split('|');
@@ -136,10 +162,16 @@ class HFormValidation {
                              * */
                             if (value.length < parameterValue && !rules.includes('permit_empty')) {
                                 this.isValid = false;
+                                if (displayMessages) {
+                                    this.showMessage(el, (errors[this.lang].min_length.replace('{0}', parameterValue)));
+                                }
                             }
                         } else {
                             if (value.length > parameterValue) {
                                 this.isValid = false;
+                                if (displayMessages) {
+                                    this.showMessage(el, errors[this.lang].max_length.replace('{0}', parameterValue));
+                                }
                             }
                         }
                     } else
@@ -156,6 +188,9 @@ class HFormValidation {
                          * */
                         if (!(new RegExp(rulesPack[rule]).test(value)) && !rules.includes('permit_empty')) {
                             this.isValid = false;
+                            if(displayMessages){
+                               this.showMessage(el, errors[this.lang][rule]);
+                            }
                         }
                     }
                 }
@@ -168,12 +203,16 @@ class HFormValidation {
                  * */
                 if ((el.getAttribute("type") === 'file' && el.files.length < 1) || value.length < 1) {
                     this.isValid = false;
+                    if(displayMessages){
+                        this.showMessage(el, errors[this.lang].required);
+                    }
                 }
 
             }
         }
         el.dataset.hfvid = (this.isValid) ? "1" : "0";
     }
+
     /*
     * Checks event
     * */
@@ -182,14 +221,17 @@ class HFormValidation {
             const inputs = this.form.querySelectorAll('[data-hfrules]');
             let isEnabled = true;
             inputs.forEach((el) => {
-                if(el.dataset.hfvid === "0"){
+                if (el.dataset.hfvid === "0") {
                     isEnabled = false;
                 }
             });
-            if(isEnabled){
-                this.submitBtn.removeAttribute("disabled");
-            }else{
-                this.submitBtn.setAttribute("disabled", "disabled");
+            if (isEnabled) {
+                this.submitBtn.style.opacity = "1";
+                this.submitBtn.style.cursor = "";
+            } else {
+                this.submitBtn.style.opacity = "0.65";
+                this.submitBtn.style.cursor = "not-allowed";
+                console.log(this.submitBtn.style.opacity);
             }
         } else {
             throw new Error('Could not find submit button, if you have something different than <input type="submit"> specify your input with data-submit attribute: <button data-submit>Submit</button>');
@@ -199,7 +241,7 @@ class HFormValidation {
     /**
      * Observe for changes in attributes and check if they are valid or not
      * */
-    observe(el){
+    observe(el) {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === "attributes" && mutation.attributeName === 'data-hfvid') {
@@ -212,7 +254,7 @@ class HFormValidation {
                      * */
                     const val = el.dataset.hfvid;
                     const isValidString = this.isValid ? "1" : "0";
-                    if(val !== "0" && val !== "1" || (isValidString !== val)){
+                    if (val !== "0" && val !== "1" || (isValidString !== val)) {
                         el.dataset.hfvid = "0";
                         this.validateAndUpdate(el);
                     }
@@ -222,6 +264,24 @@ class HFormValidation {
         observer.observe(el, {
             attributes: true //configure it to listen to attribute changes
         });
+    }
+
+    showMessage(el, message) {
+        this.removeMessage(el);
+        const p = document.createElement("p");
+        p.style.width = '100%';
+        p.style.display = 'block';
+        p.innerText = message;
+        p.dataset.hfviMessage = '';
+        p.style.color = '#dc3545';
+        el.parentNode.insertBefore(p, el.nextSibling);
+    }
+
+    removeMessage(el) {
+        const hfvi = el.parentNode.querySelector('[data-hfvi-message]');
+        if(hfvi != null){
+            hfvi.parentNode.removeChild(hfvi);
+        }
     }
 
 }
