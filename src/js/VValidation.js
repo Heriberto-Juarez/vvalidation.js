@@ -52,7 +52,7 @@ const errors = {
 const parametersRegex = new RegExp(/(?<=\[).+?(?=\])/);
 
 
-class HFormValidation {
+class VValidation {
     constructor(id, settings) {
         this.form = document.getElementById(id);
         this.submitBtn = this.form.querySelector("input[type='submit']");
@@ -411,5 +411,4 @@ class HFormValidation {
             }
         });
     }
-
 }
