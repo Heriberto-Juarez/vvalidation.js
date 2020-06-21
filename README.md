@@ -18,7 +18,9 @@ dependencies, or that are not giving you the experience you want or need.
 ## Install
 
 ##### Github:
-`Clone or download the repository
+Clone or download the repository
+
+`git clone https://github.com/Heriberto-Juarez/vvalidation.js
 `
 #### npm
 
