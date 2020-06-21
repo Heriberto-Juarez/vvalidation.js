@@ -1,9 +1,6 @@
 const gulp = require('gulp');
 const concat = require("gulp-concat");
 const terser = require("gulp-terser");
-const sass = require("gulp-sass");
-sass.compiler = require("node-sass");
-const cleanCSS = require("gulp-clean-css");
 
 const src = './src/';
 const dest = './dist/';

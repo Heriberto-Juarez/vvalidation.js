@@ -7,14 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Heriberto Juárez (heribertojuarezj@gmail.com)",
   "license": "ISC",
   "devDependencies": {
     "gulp": "^4.0.2",
-    "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
-    "gulp-sass": "^4.1.0",
-    "gulp-terser": "^1.2.0",
-    "node-sass": "^4.14.1"
+    "gulp-terser": "^1.2.0"
   }
 }
