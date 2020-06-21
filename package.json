@@ -1,12 +1,21 @@
 {
-  "name": "vvform.js",
+  "name": "vvalidation.js",
   "version": "1.0.0",
   "description": "Light weight Vanilla Javascript Form Validation library. Validate your forms (data & files) with js and submit your data to the server with this library written in pure javascript.",
   "main": "dist/js/VValidation.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "validation",
+    "form",
+    "javascript",
+    "vanilla",
+    "lightweight",
+    "bootstrap5",
+    "modal",
+    "ajax"
+  ],
   "author": "Heriberto Juárez (heribertojuarezj@gmail.com)",
   "license": "ISC",
   "devDependencies": {
