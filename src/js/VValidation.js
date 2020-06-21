@@ -61,7 +61,14 @@ class VValidation {
         }
         this.allowedFileTypes = "image/*";
         this.hasModal = true;
-        this.modal = document.getElementById("HFormModal");
+        this.modal = null;
+        try{
+            this.modal = new bootstrap.Modal(document.getElementById("VVModal"), {
+                keyboard: false
+            });
+        }catch (e) {
+            console.log('Warning: Modal with VVModal id not found.');
+        }
         this.isValid = true;
         this.lang = 'en';
         this.handleFormSubmition = true;
@@ -71,6 +78,7 @@ class VValidation {
         this.validateAll(false);
         this.attachEventHandlers();
         this.enableScroll = true;
+        this.form.setAttribute("enctype","multipart/form-data");
     }
 
     attachEventHandlers() {
@@ -119,18 +127,15 @@ class VValidation {
                     }
                 }
             }else if (this.isEnabled && this.handleFormSubmition){
-                console.log("Submit!");
                 this.ajax({
                     url : this.form.getAttribute("action")
                 }).then((response) => {
-                    console.log("Then");
                     try {
-                        console.log("Try");
                         let r = JSON.parse(response);
-                        console.log(r);
+                        this.processJSONResponse(r);
                     }catch (e) {
-                        alert("Error, server returned unexpected response");
-                        throw new Error('Response must be a json string');
+                        alert(e);
+                        throw new Error(e);
                     }
                 }).catch((error) => {
                     alert(error);
@@ -217,7 +222,6 @@ class VValidation {
                             }else {
                                 Array.from(el.files).forEach((file) => {
                                     const f_size = file.size /1024 / 1024;
-                                    console.log(file.name, f_size);
                                     if(f_size > parameterValue){
                                         this.isValid = false;
                                         if (displayMessages) {
@@ -361,27 +365,26 @@ class VValidation {
     }
 
     ajax(settings){
-        let ajaxSettings = {
-            method: 'post',
-            url: '',
-            data: new FormData(this.form)
-        };
-
-        const files = this.form.querySelectorAll("input[type='file']");
-        files.forEach((element) => {
-
-            if(element.hasAttribute("name") && element.name.length > 0){
-                Array.from(element.files).forEach((file) => {
-                    ajaxSettings.data.append(element.name, file);
-                });
-            }
-        });
-
-        for (let key in settings){
-            ajaxSettings[key] = settings[key];
-        }
-
         return new Promise((resolve, reject) => {
+            let ajaxSettings = {
+                method: 'post',
+                url: '',
+                data: new FormData(this.form)
+            };
+
+            const files = this.form.querySelectorAll("input[type='file']");
+            files.forEach((element) => {
+                if(element.hasAttribute("name") && element.name.length > 0){
+                    Array.from(element.files).forEach((file) => {
+                        ajaxSettings.data.append(element.name, file);
+                    });
+                }
+            });
+
+            for (let key in settings){
+                ajaxSettings[key] = settings[key];
+            }
+
             let request = null;
             try{
                 request = new XMLHttpRequest();
@@ -398,17 +401,55 @@ class VValidation {
             }
             if(request != null){
                 request.onreadystatechange = function(r) {
-                    if (r.readyState === 4) {
-                        resolve(r.response);
+                    if (r.currentTarget.readyState === 4) {
+                        resolve(r.currentTarget.response);
                     }
                 }
                 request.open(ajaxSettings.method, ajaxSettings.url);
                 request.send(ajaxSettings.data);
-                console.log(new FormData(this.form), this.form);
             }else{
                 alert("Browser does not support requests, try updating your browser.");
                 reject('Browser does not support requests');
             }
         });
+    }
+
+    processJSONResponse(response) {
+        for (let k in response) {
+            const element = this.form.querySelector(`[name="${k}"]`);
+
+            if (k === 'modal' && response.modal !== null) {
+                if(this.modal !== null){
+                    const el = this.modal['_element'];
+                    const body = el.querySelector('.modal-body');
+                    const title = el.querySelector('.modal-title');
+
+                    title.innerHTML = response.modal.title;
+
+                    if(typeof response.modal.body === 'object'){
+                        body.innerHTML = '';
+
+                        for(let j  in response.modal.body){
+                            const p = document.createElement("p");
+                            if(isNaN(j)){
+                                p.textContent = `${j}: ${response.modal.body[j]}`;
+                            }else{
+                                p.textContent = `${response.modal.body[j]}`;
+                            }
+                            body.appendChild(p);
+                        }
+
+                    }else{
+                        const p = document.createElement('p');
+                        p.textContent = response.modal.body;
+                        body.appendChild(p);
+                    }
+                    this.modal.show();
+
+                }
+            } else if (element !== null) {
+                this.showMessage(element, response[k]);
+            }
+        }
     }
 }
