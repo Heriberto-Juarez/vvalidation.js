@@ -66,13 +66,13 @@ class VValidation {
         }
         this.isValid = true;
         this.lang = 'en';
-        this.handleFormSubmition = true;
+        this.handleFormSubmission = true;
         this.typingSeconds = 0.50;
+        this.enableScroll = true;
         settings = settings || {};
         for (let key in settings) this[key] = settings[key];
         this.validateAll(false);
         this.attachEventHandlers();
-        this.enableScroll = true;
     }
 
     attachEventHandlers() {
@@ -113,7 +113,7 @@ class VValidation {
                         });
                     }
                 }
-            }else if (this.isEnabled && this.handleFormSubmition){
+            }else if (this.isEnabled && this.handleFormSubmission){
                 this.ajax().then((response) => {
                     try {
                         let r = JSON.parse(response);
