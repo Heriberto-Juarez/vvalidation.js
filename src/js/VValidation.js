@@ -12,7 +12,6 @@ const rulesPack = {
     'integer': /^[0-9]+$/,
     'valid_email': /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 };
-
 const errors = {
     'es': {
         'alpha': 'Ingrese únicamente valores alfabéticos',
@@ -58,42 +57,31 @@ const parametersRegex = new RegExp(/(?<=\[).+?(?=\])/);
 class VValidation {
     constructor(id, settings) {
         this.form = document.getElementById(id);
-        this.submitBtn = this.form.querySelector("input[type='submit']");
-        if (this.submitBtn === null) {
-            this.submitBtn = this.form.querySelector('[data-submit]');
-        }
-        this.allowedFileTypes = "image/*";
-        this.hasModal = true;
-        this.modal = null;
+        this.submitBtn = this.form.querySelector("[type='submit']");
+        if (this.submitBtn === null) this.submitBtn = this.form.querySelector('[data-submit]');
         try{
-            this.modal = new bootstrap.Modal(document.getElementById("VVModal"), {
-                keyboard: false
-            });
+            this.modal = new bootstrap.Modal(document.getElementById("VVModal"));
         }catch (e) {
-            console.log('Warning: Modal with VVModal id not found.');
+            this.modal = null;
         }
         this.isValid = true;
         this.lang = 'en';
         this.handleFormSubmition = true;
         this.typingSeconds = 0.50;
         settings = settings || {};
-        for (let key in settings) this[key] = settings[key]; //assign settings to HForm object
+        for (let key in settings) this[key] = settings[key];
         this.validateAll(false);
         this.attachEventHandlers();
         this.enableScroll = true;
-        this.form.setAttribute("enctype","multipart/form-data");
     }
 
     attachEventHandlers() {
-
         this.form.addEventListener("submit", function (e) {
             e.preventDefault();
         });
-
-        const inputs = this.form.querySelectorAll('[data-hfrules]');
+        const inputs = this.form.querySelectorAll('[data-vvrules]');
         inputs.forEach((el) => {
             this.isValid = true;
-
             if (el.getAttribute("type") !== null && el.getAttribute("type") === "file") {
                 el.addEventListener("change", () => {
                     this.validateAndUpdate(el);
@@ -113,26 +101,20 @@ class VValidation {
         });
 
         this.submitBtn.addEventListener("click", (e) => {
-
-            e.stopPropagation();
-            e.preventDefault();
             this.validateAll();
-
             if(this.submitBtn.style.opacity === "0.65"){
                 if(this.enableScroll){
-                    const hfvi = this.form.querySelector("[data-hfvi-message]");
-                    if(hfvi !== null && hfvi !== undefined && hfvi.offsetTop > 66){
+                    const vvi = this.form.querySelector("[data-vvmsg]");
+                    if(vvi !== null && vvi.offsetTop > 66){
                         window.scroll({
-                            top: hfvi.offsetTop-65,
+                            top: vvi.offsetTop-66,
                             left: 0,
                             behavior: 'smooth'
                         });
                     }
                 }
             }else if (this.isEnabled && this.handleFormSubmition){
-                this.ajax({
-                    url : this.form.getAttribute("action")
-                }).then((response) => {
+                this.ajax().then((response) => {
                     try {
                         let r = JSON.parse(response);
                         this.processJSONResponse(r);
@@ -140,30 +122,26 @@ class VValidation {
                         alert(e);
                         throw new Error(e);
                     }
-                }).catch((error) => {
-                    alert(error);
-                    throw new Error(error);
+                }).catch((e) => {
+                    alert(e);
+                    throw new Error(e);
                 });
             }
         });
     }
 
     validateAndUpdate(el, displayMessages) {
-        if(displayMessages === null || displayMessages === undefined){
-            displayMessages = true;
-        }
+        if(displayMessages === undefined) displayMessages = true;
         this.validateElement(el, displayMessages);
         this.toggleSubmitButton();
     }
 
 
     validateAll(displayMessages) {
-        if(displayMessages === null || displayMessages === undefined){
-            displayMessages = true;
-        }
-        const inputs = this.form.querySelectorAll('[data-hfrules]')
+        if(displayMessages === undefined) displayMessages = true;
+        const inputs = this.form.querySelectorAll('[data-vvrules]')
         inputs.forEach((el) => {
-            el.dataset.hfvid = "1";
+            el.dataset.vvid = "1";
             this.validateElement(el, displayMessages);
             this.observe(el);
         });
@@ -172,12 +150,11 @@ class VValidation {
 
     validateElement(el, displayMessages) {
         this.removeMessage(el);
-        if(displayMessages === null || displayMessages === undefined){
-            displayMessages = true;
-        }
+        if(displayMessages === undefined) displayMessages = true;
+
         this.isValid = true;
         const nodeName = el.nodeName;
-        const rules = el.getAttribute('data-hfrules').split('|');
+        const rules = el.getAttribute('data-vvrules').split('|');
         let value = nodeName === 'select' ? el.options[el.selectedIndex].value : el.value;
         for (let index in rules) {
             const rule = rules[index].toLowerCase();
@@ -291,7 +268,7 @@ class VValidation {
 
             }
         }
-        el.dataset.hfvid = (this.isValid) ? "1" : "0";
+        el.dataset.vvid = (this.isValid) ? "1" : "0";
     }
 
     /*
@@ -299,10 +276,10 @@ class VValidation {
     * */
     toggleSubmitButton() {
         if (this.submitBtn) {
-            const inputs = this.form.querySelectorAll('[data-hfrules]');
+            const inputs = this.form.querySelectorAll('[data-vvrules]');
             let isEnabled = true;
             inputs.forEach((el) => {
-                if (el.dataset.hfvid === "0") {
+                if (el.dataset.vvid === "0") {
                     isEnabled = false;
                 }
             });
@@ -326,18 +303,16 @@ class VValidation {
     observe(el) {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if (mutation.type === "attributes" && mutation.attributeName === 'data-hfvid') {
+                if (mutation.attributeName === 'data-vvid') {
                     /**
-                     * data-hfvid attribute has changed
+                     * data-vvid attribute has changed
                      * To prevent other values different than 0 or 1 and manual manipulations we should make sure the next steps are true
                      * 1. Value is 0 or 1
-                     * 2. this.isValid parsed to string (1 or 0) should be equal to data-hfvid because that is the validation state of the current element
-                     * Step 2 makes sure that the user tries to change data-hfvid from false to true
+                     * 2. this.isValid parsed to string (1 or 0) should be equal to data-vvid because that is the validation state of the current element
+                     * Step 2 makes sure that the user tries to change data-vvid from false to true
                      * */
-                    const val = el.dataset.hfvid;
-                    const isValidString = this.isValid ? "1" : "0";
+                    const val = el.dataset.vvid, isValidString = this.isValid ? "1" : "0";
                     if (val !== "0" && val !== "1" ) {
-                        el.dataset.hfvid = "0";
                         this.validateAndUpdate(el);
                     }
                 }
@@ -351,31 +326,27 @@ class VValidation {
     showMessage(el, message) {
         this.removeMessage(el);
         const p = document.createElement("p");
-        p.style.width = '100%';
-        p.style.display = 'block';
         p.innerText = message;
-        p.dataset.hfviMessage = '';
+        p.dataset.vvmsg = '';
         p.style.color = '#dc3545';
         p.style.marginBottom = 0;
         el.parentNode.insertBefore(p, el.nextSibling);
     }
 
     removeMessage(el) {
-        const hfvi = el.parentNode.querySelector('[data-hfvi-message]');
-        if(hfvi != null){
-            hfvi.parentNode.removeChild(hfvi);
-        }
+        const vvi = el.parentNode.querySelector('[data-vvmsg]');
+        if(vvi != null) vvi.parentNode.removeChild(vvi);
     }
 
     ajax(settings){
         return new Promise((resolve, reject) => {
             let ajaxSettings = {
                 method: 'post',
-                url: '',
+                url: this.form.getAttribute("action"),
                 data: new FormData(this.form)
             };
 
-            const files = this.form.querySelectorAll("input[type='file']");
+            const files = this.form.querySelectorAll("[type='file']");
             files.forEach((element) => {
                 if(element.hasAttribute("name") && element.name.length > 0){
                     Array.from(element.files).forEach((file) => {
@@ -387,32 +358,18 @@ class VValidation {
             for (let key in settings){
                 ajaxSettings[key] = settings[key];
             }
-
-            let request = null;
             try{
-                request = new XMLHttpRequest();
-            }catch (e) {
-                try {
-                    request = new ActiveXObject("Msxml12.XMLHTTP");
-                }catch (e) {
-                    try {
-                        request = new ActiveXObject("Microsoft.XMLHTTP");
-                    }catch (e) {
-                        request = null;
-                    }
-                }
-            }
-            if(request != null){
-                request.onreadystatechange = function(r) {
+                let request = new XMLHttpRequest();
+                request.onreadystatechange = (r) => {
                     if (r.currentTarget.readyState === 4) {
                         resolve(r.currentTarget.response);
                     }
                 }
                 request.open(ajaxSettings.method, ajaxSettings.url);
                 request.send(ajaxSettings.data);
-            }else{
-                alert("Browser does not support requests, try updating your browser.");
-                reject('Browser does not support requests');
+            }catch (e) {
+                alert(e);
+                reject(e);
             }
         });
     }
@@ -423,9 +380,7 @@ class VValidation {
 
             if (k === 'modal' && response.modal !== null) {
                 if(this.modal !== null){
-                    const el = this.modal['_element'];
-                    const body = el.querySelector('.modal-body');
-                    const title = el.querySelector('.modal-title');
+                    const el = this.modal['_element'], body = el.querySelector('.modal-body'), title = el.querySelector('.modal-title');
 
                     title.innerHTML = response.modal.title;
                     body.innerHTML = '';
@@ -433,11 +388,7 @@ class VValidation {
                     if(typeof response.modal.body === 'object'){
                         for(let j  in response.modal.body){
                             const p = document.createElement("p");
-                            if(isNaN(j)){
-                                p.textContent = `${j}: ${response.modal.body[j]}`;
-                            }else{
-                                p.textContent = `${response.modal.body[j]}`;
-                            }
+                            p.textContent = isNaN(j) ? `${j}: ${response.modal.body[j]}` : `${response.modal.body[j]}`;
                             body.appendChild(p);
                         }
                     }else{
@@ -446,7 +397,6 @@ class VValidation {
                         body.appendChild(p);
                     }
                     this.modal.show();
-
                 }
             } else if (element !== null) {
                 this.showMessage(element, response[k]);
