@@ -155,6 +155,8 @@ the input.
 
 **2. You can use bootstrap 5 modals:**
 
+![image](https://user-images.githubusercontent.com/20604217/85223260-51a5d200-b387-11ea-9036-29ad8bde264e.png)
+   
 This is totally optional, and I've added this because bootstrap is world widely used and
 because I use it a lot, but as I said, this is totally optional. 
 
