@@ -3,6 +3,8 @@ This is a vanilla javascript validation library by Heriberto Juárez. Created wi
 people's life's better (mine too), while avoiding the use of heavy libraries that have a lot of 
 dependencies, or that are not giving you the experience you want or need.
 
+![image](https://user-images.githubusercontent.com/20604217/85223218-dd6b2e80-b386-11ea-9ea0-6a6f7fdacf94.png)
+
 
 ## Features:
 * File validation
