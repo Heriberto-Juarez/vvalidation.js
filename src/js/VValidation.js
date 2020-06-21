@@ -330,6 +330,7 @@ class VValidation {
         p.dataset.vvmsg = '';
         p.style.color = '#dc3545';
         p.style.marginBottom = 0;
+        p.style.width = "100%";
         el.parentNode.insertBefore(p, el.nextSibling);
     }
 
