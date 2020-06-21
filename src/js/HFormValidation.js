@@ -25,7 +25,10 @@ const errors = {
         'integer': 'Ingrese únicamente valores enteros',
         'min_length': 'Ingrese al menos {0} caracteres',
         'max_length': 'Ingrese como máximo {0} caracteres',
-        'required': 'Este campo es requerido'
+        'required': 'Este campo es requerido',
+        'min_length_files': 'Seleccione al menos {0} archivos',
+        'max_length_files': 'Seleccione máximo {0} archivos',
+        'max_size': 'Cada archivo debe pesar como máximo {0} Mb. El archivo {1} supera el límite.'
     },
     'en': {
         'alpha': 'Enter alphabetic values only',
@@ -39,7 +42,10 @@ const errors = {
         'integer': 'Enter integer values only',
         'min_length': 'Enter at least {0} characters',
         'max_length': 'Enter maximum {0} characters',
-        'required': 'This field is required'
+        'required': 'This field is required',
+        'min_length_files': 'Select at least {0} files',
+        'max_length_files': 'Select maximum {0} files',
+        'max_size': 'Each file must weigh maximum {0} Mb. The file {1} exceeds the limit'
     },
 };
 
@@ -64,6 +70,7 @@ class HFormValidation {
         for (let key in settings) this[key] = settings[key]; //assign settings to HForm object
         this.validateAll(false);
         this.attachEventHandlers();
+        this.enableScroll = true;
     }
 
     attachEventHandlers() {
@@ -93,16 +100,47 @@ class HFormValidation {
                 });
             }
         });
-        this.submitBtn.addEventListener("click", () => {
-            console.log("Clic");
+
+        this.submitBtn.addEventListener("click", (e) => {
+
+            e.stopPropagation();
+            e.preventDefault();
+            this.validateAll();
+
             if(this.submitBtn.style.opacity === "0.65"){
-                this.validateAll(true);
+                if(this.enableScroll){
+                    const hfvi = this.form.querySelector("[data-hfvi-message]");
+                    if(hfvi !== null && hfvi !== undefined && hfvi.offsetTop > 66){
+                        window.scroll({
+                            top: hfvi.offsetTop-65,
+                            left: 0,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            }else if (this.isEnabled && this.handleFormSubmition){
+                console.log("Submit!");
+                this.ajax({
+                    url : this.form.getAttribute("action")
+                }).then((response) => {
+                    console.log("Then");
+                    try {
+                        console.log("Try");
+                        let r = JSON.parse(response);
+                        console.log(r);
+                    }catch (e) {
+                        alert("Error, server returned unexpected response");
+                        throw new Error('Response must be a json string');
+                    }
+                }).catch((error) => {
+                    alert(error);
+                    throw new Error(error);
+                });
             }
         });
     }
 
     validateAndUpdate(el, displayMessages) {
-        console.log("Validate element");
         if(displayMessages === null || displayMessages === undefined){
             displayMessages = true;
         }
@@ -142,12 +180,15 @@ class HFormValidation {
 
                 let minRegex = new RegExp(/^min_length/);
                 let maxRegex = new RegExp(/^max_length/);
+                let maxSizeRegex = new RegExp(/^max_size/);
+
                 let type = '';
                 if (rule.match(minRegex))
                     type = 'min';
                 else if (rule.match(maxRegex))
                     type = 'max';
-
+                else if (rule.match(maxSizeRegex))
+                    type = 'max_size'
                 if (type !== '') {
                     let parameterValue = '';
                     try {
@@ -155,25 +196,58 @@ class HFormValidation {
                     } catch (e) {
                         throw new Error(`The ${type}_length's parameter could not be read. Please check you are using the following syntax: ${type}_length[INTEGER_VALUE]`);
                     }
-                    if (parameterValue.match(new RegExp(rulesPack['integer']))) {
-                        if (type === 'min') {
-                            /**
-                             * If permit empty is set, then min_length can be omitted
-                             * */
-                            if (value.length < parameterValue && !rules.includes('permit_empty')) {
-                                this.isValid = false;
-                                if (displayMessages) {
-                                    this.showMessage(el, (errors[this.lang].min_length.replace('{0}', parameterValue)));
+                    if (parameterValue.match(new RegExp(rulesPack['integer'])) || (type === 'max_size' && parameterValue.match(new RegExp(rulesPack['decimal'])))) {
+
+                        if(el.nodeName.toLowerCase() === 'input' && el.getAttribute("type") === 'file'){
+                            parameterValue = parseFloat(parameterValue);
+                            if(type === 'min'){
+                                if(el.files.length < parameterValue){
+                                    this.isValid = false;
+                                    if (displayMessages) {
+                                        this.showMessage(el, (errors[this.lang].min_length_files.replace('{0}', parameterValue)));
+                                    }
                                 }
+                            }else if(type === 'max'){
+                                if(el.files.length > parameterValue){
+                                    this.isValid = false;
+                                    if (displayMessages) {
+                                        this.showMessage(el, (errors[this.lang].max_length_files.replace('{0}', parameterValue)));
+                                    }
+                                }
+                            }else {
+                                Array.from(el.files).forEach((file) => {
+                                    const f_size = file.size /1024 / 1024;
+                                    console.log(file.name, f_size);
+                                    if(f_size > parameterValue){
+                                        this.isValid = false;
+                                        if (displayMessages) {
+                                            this.showMessage(el, (errors[this.lang].max_size.replace('{0}', parameterValue)).replace('{1}',file.name));
+                                        }
+                                    }
+                                });
                             }
-                        } else {
-                            if (value.length > parameterValue) {
-                                this.isValid = false;
-                                if (displayMessages) {
-                                    this.showMessage(el, errors[this.lang].max_length.replace('{0}', parameterValue));
+                        }else{
+                            parameterValue = parseInt(parameterValue);
+                            if (type === 'min') {
+                                /**
+                                 * If permit empty is set, then min_length can be omitted
+                                 * */
+                                if (value.length < parameterValue && !rules.includes('permit_empty')) {
+                                    this.isValid = false;
+                                    if (displayMessages) {
+                                        this.showMessage(el, (errors[this.lang].min_length.replace('{0}', parameterValue)));
+                                    }
+                                }
+                            } else {
+                                if (value.length > parameterValue) {
+                                    this.isValid = false;
+                                    if (displayMessages) {
+                                        this.showMessage(el, errors[this.lang].max_length.replace('{0}', parameterValue));
+                                    }
                                 }
                             }
                         }
+
                     } else
                         throw new Error(`${type}_length's parameter must be an integer`);
 
@@ -228,10 +302,11 @@ class HFormValidation {
             if (isEnabled) {
                 this.submitBtn.style.opacity = "1";
                 this.submitBtn.style.cursor = "";
+                this.isEnabled = true;
             } else {
                 this.submitBtn.style.opacity = "0.65";
                 this.submitBtn.style.cursor = "not-allowed";
-                console.log(this.submitBtn.style.opacity);
+                this.isEnabled = false;
             }
         } else {
             throw new Error('Could not find submit button, if you have something different than <input type="submit"> specify your input with data-submit attribute: <button data-submit>Submit</button>');
@@ -254,7 +329,7 @@ class HFormValidation {
                      * */
                     const val = el.dataset.hfvid;
                     const isValidString = this.isValid ? "1" : "0";
-                    if (val !== "0" && val !== "1" || (isValidString !== val)) {
+                    if (val !== "0" && val !== "1" ) {
                         el.dataset.hfvid = "0";
                         this.validateAndUpdate(el);
                     }
@@ -274,6 +349,7 @@ class HFormValidation {
         p.innerText = message;
         p.dataset.hfviMessage = '';
         p.style.color = '#dc3545';
+        p.style.marginBottom = 0;
         el.parentNode.insertBefore(p, el.nextSibling);
     }
 
@@ -282,6 +358,58 @@ class HFormValidation {
         if(hfvi != null){
             hfvi.parentNode.removeChild(hfvi);
         }
+    }
+
+    ajax(settings){
+        let ajaxSettings = {
+            method: 'post',
+            url: '',
+            data: new FormData(this.form)
+        };
+
+        const files = this.form.querySelectorAll("input[type='file']");
+        files.forEach((element) => {
+
+            if(element.hasAttribute("name") && element.name.length > 0){
+                Array.from(element.files).forEach((file) => {
+                    ajaxSettings.data.append(element.name, file);
+                });
+            }
+        });
+
+        for (let key in settings){
+            ajaxSettings[key] = settings[key];
+        }
+
+        return new Promise((resolve, reject) => {
+            let request = null;
+            try{
+                request = new XMLHttpRequest();
+            }catch (e) {
+                try {
+                    request = new ActiveXObject("Msxml12.XMLHTTP");
+                }catch (e) {
+                    try {
+                        request = new ActiveXObject("Microsoft.XMLHTTP");
+                    }catch (e) {
+                        request = null;
+                    }
+                }
+            }
+            if(request != null){
+                request.onreadystatechange = function(r) {
+                    if (r.readyState === 4) {
+                        resolve(r.response);
+                    }
+                }
+                request.open(ajaxSettings.method, ajaxSettings.url);
+                request.send(ajaxSettings.data);
+                console.log(new FormData(this.form), this.form);
+            }else{
+                alert("Browser does not support requests, try updating your browser.");
+                reject('Browser does not support requests');
+            }
+        });
     }
 
 }
