@@ -9,7 +9,8 @@ const rulesPack = {
     'alpha_numeric_punct': /^[a-zA-Z0-9\~\!\#\$\%\&\*\-\_\+\=\|\:\.]+$/,
     'decimal': /^[-+]?\d+(?:[,.]\d+)*$/,
     'hexadecimal': /^[0-9a-fA-F]+$/,
-    'integer': /^[0-9]+$/
+    'integer': /^[0-9]+$/,
+    'valid_email': /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 };
 
 const errors = {
@@ -28,7 +29,8 @@ const errors = {
         'required': 'Este campo es requerido',
         'min_length_files': 'Seleccione al menos {0} archivos',
         'max_length_files': 'Seleccione máximo {0} archivos',
-        'max_size': 'Cada archivo debe pesar como máximo {0} Mb. El archivo {1} supera el límite.'
+        'max_size': 'Cada archivo debe pesar como máximo {0} Mb. El archivo {1} supera el límite.',
+        'valid_email': 'Ingrese una dirección de correo electrónico valida'
     },
     'en': {
         'alpha': 'Enter alphabetic values only',
@@ -45,7 +47,8 @@ const errors = {
         'required': 'This field is required',
         'min_length_files': 'Select at least {0} files',
         'max_length_files': 'Select maximum {0} files',
-        'max_size': 'Each file must weigh maximum {0} Mb. The file {1} exceeds the limit'
+        'max_size': 'Each file must weigh maximum {0} Mb. The file {1} exceeds the limit',
+        'valid_email': 'Enter a valid email address'
     },
 };
 
@@ -425,10 +428,9 @@ class VValidation {
                     const title = el.querySelector('.modal-title');
 
                     title.innerHTML = response.modal.title;
+                    body.innerHTML = '';
 
                     if(typeof response.modal.body === 'object'){
-                        body.innerHTML = '';
-
                         for(let j  in response.modal.body){
                             const p = document.createElement("p");
                             if(isNaN(j)){
@@ -438,7 +440,6 @@ class VValidation {
                             }
                             body.appendChild(p);
                         }
-
                     }else{
                         const p = document.createElement('p');
                         p.textContent = response.modal.body;
