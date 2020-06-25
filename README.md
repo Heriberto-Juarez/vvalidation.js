@@ -10,7 +10,7 @@ dependencies, or that are not giving you the experience you want or need.
 * File validation
 * Inputs validation (input, textarea,...)
 * Languages support (English and Spanish supported)
-* Lightweight (Currently 7.9 KB)
+* Lightweight (Currently: The final script is less than 8 KB)
 * Easy to implement
 * Compatible with bootstrap 5
 * Show modals if available
