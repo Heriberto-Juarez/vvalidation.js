@@ -190,7 +190,7 @@ class VValidation {
                         console.log(e);
                         throw new Error(`The ${type}_length's parameter could not be read. Please check you are using the following syntax: ${type}_length[INTEGER_VALUE]`);
                     }
-                    if (parameterValue.match(new RegExp(VValidation.rulesPack['integer'])) || (type === 'max_size' && parameterValue.match(new RegExp(VValidation.rulesPack['decimal'])))) {
+                    if (parameterValue.match(new RegExp(VValidation.rulesPack()['integer'])) || (type === 'max_size' && parameterValue.match(new RegExp(VValidation.rulesPack()['decimal'])))) {
 
                         if(el.nodeName.toLowerCase() === 'input' && el.getAttribute("type") === 'file'){
                             parameterValue = parseFloat(parameterValue);
@@ -198,14 +198,14 @@ class VValidation {
                                 if(el.files.length < parameterValue){
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, (VValidation.errors[this.lang].min_length_files.replace('{0}', parameterValue)));
+                                        this.showMessage(el, (VValidation.errors()[this.lang].min_length_files.replace('{0}', parameterValue)));
                                     }
                                 }
                             }else if(type === 'max'){
                                 if(el.files.length > parameterValue){
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, (VValidation.errors[this.lang].max_length_files.replace('{0}', parameterValue)));
+                                        this.showMessage(el, (VValidation.errors()[this.lang].max_length_files.replace('{0}', parameterValue)));
                                     }
                                 }
                             }else {
@@ -214,7 +214,7 @@ class VValidation {
                                     if(f_size > parameterValue){
                                         this.isValid = false;
                                         if (displayMessages) {
-                                            this.showMessage(el, (VValidation.errors[this.lang].max_size.replace('{0}', parameterValue)).replace('{1}',file.name));
+                                            this.showMessage(el, (VValidation.errors()[this.lang].max_size.replace('{0}', parameterValue)).replace('{1}',file.name));
                                         }
                                     }
                                 });
@@ -228,14 +228,14 @@ class VValidation {
                                 if (value.length < parameterValue && !rules.includes('permit_empty')) {
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, (VValidation.errors[this.lang].min_length.replace('{0}', parameterValue)));
+                                        this.showMessage(el, (VValidation.errors()[this.lang].min_length.replace('{0}', parameterValue)));
                                     }
                                 }
                             } else {
                                 if (value.length > parameterValue) {
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, VValidation.errors[this.lang].max_length.replace('{0}', parameterValue));
+                                        this.showMessage(el, VValidation.errors()[this.lang].max_length.replace('{0}', parameterValue));
                                     }
                                 }
                             }
@@ -248,15 +248,15 @@ class VValidation {
                     /**
                      * The rule is not a length check. Let's try finding the rule in rulesPack object
                      * */
-                    if (VValidation.rulesPack.hasOwnProperty(rule)) {
+                    if (VValidation.rulesPack().hasOwnProperty(rule)) {
                         /**
                          * rule exists, so we create a new Regex and check if it matches the input value.
                          * If the regex does not match the value we assign isValid to false;
                          * */
-                        if (!(new RegExp(VValidation.rulesPack[rule]).test(value)) && !rules.includes('permit_empty')) {
+                        if (!(new RegExp(VValidation.rulesPack()[rule]).test(value)) && !rules.includes('permit_empty')) {
                             this.isValid = false;
                             if(displayMessages){
-                               this.showMessage(el, VValidation.errors[this.lang][rule]);
+                               this.showMessage(el, VValidation.errors()[this.lang][rule]);
                             }
                         }
                     }
@@ -271,7 +271,7 @@ class VValidation {
                 if ((el.getAttribute("type") === 'file' && el.files.length < 1) || value.length < 1) {
                     this.isValid = false;
                     if(displayMessages){
-                        this.showMessage(el, VValidation.errors[this.lang].required);
+                        this.showMessage(el, VValidation.errors()[this.lang].required);
                     }
                 }
 
