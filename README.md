@@ -28,7 +28,44 @@ Clone or download the repository
 
 `npm i vvalidation.js`
 
-Currently, the only way to run use the library is by using a script tag. (I plan to add node's **require** support in the future.)
+You can load the VValidation class by using the following code:
+
+    var vvalidation = require("vvalidation.js")
+    new vvalidation('id'. {lang: 'es'});
+    
+    
+**Important:** 
+
+Node.js does not have a document defined because of what node.js is. 
+
+As you may have noticed to create an instance of the class you need to pass an ID as
+the first parameter, that parameter is used to search in the document with that 
+id. That's why we need the document.
+
+
+##### Do you still want to use node to require this library?
+
+To be able to use this library with node for your purposes you need a way 
+to specify the document.  (If you prefer you can use your own solution)
+
+You can do it this way:
+
+    var jsdom = require("jsdom");
+    const { JSDOM } = jsdom;
+    const { window } = new JSDOM();
+    const { document } = (new JSDOM('')).window;
+    global.document = document;
+    var vvalidation = require("vvalidation.js")
+    new vvalidation('id', {lang: 'es'});
+
+
+### The prefered way:
+Using the script tag is the best way to load this library. 
+First clone  or download the project.
+
+You should copy the `VValidation.min.js` file located at `dist/js/` into 
+the location you want. Then you should add a `script` tag with the path of 
+the file you copied. 
 
 `<script src="path/to/VValidation.min.js"></script>`
 
