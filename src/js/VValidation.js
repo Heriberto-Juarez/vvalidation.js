@@ -76,10 +76,6 @@ class VValidation {
         };
     }
 
-    static parametersRegex(){
-        return new RegExp(/\[(.*?)\]/);
-    }
-
     attachEventHandlers() {
         this.form.addEventListener("submit", function (e) {
             e.preventDefault();
@@ -188,9 +184,10 @@ class VValidation {
                 if (type !== '') {
                     let parameterValue = '';
                     try {
-                        parameterValue = VValidation.parametersRegex.exec(rule)[0];
+                        parameterValue = /[\[]{1,1}.+[\]]$/.exec(rule)[0];
                         parameterValue = parameterValue.substr(1, parameterValue.length-2);
                     } catch (e) {
+                        console.log(e);
                         throw new Error(`The ${type}_length's parameter could not be read. Please check you are using the following syntax: ${type}_length[INTEGER_VALUE]`);
                     }
                     if (parameterValue.match(new RegExp(VValidation.rulesPack['integer'])) || (type === 'max_size' && parameterValue.match(new RegExp(VValidation.rulesPack['decimal'])))) {
