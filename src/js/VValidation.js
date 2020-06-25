@@ -88,11 +88,17 @@ class VValidation {
                 });
             } else {
                 let typingTimer;
-                el.addEventListener('keyup', () => {
-                    clearTimeout(typingTimer);
-                    typingTimer = setTimeout(() => {
-                        this.validateAndUpdate(el);
-                    }, this.typingSeconds * 1000);
+                ['keyup','change'].forEach((evt) => {
+                    let multiplier = 1000;
+                    if(evt === 'change'){
+                        multiplier = 0;
+                    }
+                    el.addEventListener(evt, () => {
+                        clearTimeout(typingTimer);
+                        typingTimer = setTimeout(() => {
+                            this.validateAndUpdate(el);
+                        }, this.typingSeconds * multiplier);
+                    });
                 });
                 el.addEventListener('keydown', function () {
                     clearTimeout(typingTimer);
