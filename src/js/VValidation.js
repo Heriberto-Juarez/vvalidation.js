@@ -395,12 +395,12 @@ class VValidation {
                     if(typeof response.modal.body === 'object'){
                         for(let j  in response.modal.body){
                             const p = document.createElement("p");
-                            p.textContent = isNaN(j) ? `${j}: ${response.modal.body[j]}` : `${response.modal.body[j]}`;
+                            p.innerHTML = isNaN(j) ? `${j}: ${response.modal.body[j]}` : `${response.modal.body[j]}`;
                             body.appendChild(p);
                         }
                     }else{
                         const p = document.createElement('p');
-                        p.textContent = response.modal.body;
+                        p.innerHTML = response.modal.body;
                         body.appendChild(p);
                     }
                     this.modal.show();
