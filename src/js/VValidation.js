@@ -12,6 +12,7 @@ const rulesPack = {
     'integer': /^[0-9]+$/,
     'valid_email': /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 };
+
 const errors = {
     'es': {
         'alpha': 'Ingrese únicamente valores alfabéticos',
@@ -51,8 +52,7 @@ const errors = {
     },
 };
 
-const parametersRegex = new RegExp(/(?<=\[).+?(?=\])/);
-
+const parametersRegex = new RegExp(/\[(.*?)\]/);
 
 class VValidation {
     constructor(id, settings) {
@@ -184,6 +184,7 @@ class VValidation {
                     let parameterValue = '';
                     try {
                         parameterValue = parametersRegex.exec(rule)[0];
+                        parameterValue = parameterValue.substr(1, parameterValue.length-2);
                     } catch (e) {
                         throw new Error(`The ${type}_length's parameter could not be read. Please check you are using the following syntax: ${type}_length[INTEGER_VALUE]`);
                     }
