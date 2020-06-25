@@ -7,6 +7,7 @@ const dest = './dist/';
 
 gulp.task("minify:js", async () => {
     compress_js(gulp.src(src + "js/*.js").pipe(concat("VValidation.min.js")));
+    compress_js(gulp.src(src + "js/*.js").pipe(concat("VValidation.js")));
 });
 
 gulp.task('watch', async () => {
