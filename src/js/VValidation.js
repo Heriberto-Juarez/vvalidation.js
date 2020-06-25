@@ -1,59 +1,4 @@
 "use strict";
-
-const rulesPack = {
-    'alpha': /^[a-zA-Z]+$/,
-    'alpha_space': /^[a-zA-Z\s]+$/,
-    'alpha_dash': /^[a-zA-Z_]+$/,
-    'alpha_numeric': /^[a-zA-Z0-9]+$/,
-    'alpha_numeric_space': /^[a-zA-Z0-9\s]+$/,
-    'alpha_numeric_punct': /^[a-zA-Z0-9\~\!\#\$\%\&\*\-\_\+\=\|\:\.]+$/,
-    'decimal': /^[-+]?\d+(?:[,.]\d+)*$/,
-    'hexadecimal': /^[0-9a-fA-F]+$/,
-    'integer': /^[0-9]+$/,
-    'valid_email': /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-};
-
-const errors = {
-    'es': {
-        'alpha': 'Ingrese únicamente valores alfabéticos',
-        'alpha_space': 'Ingrese únicamente valores alfabéticos y espacios',
-        'alpha_dash': 'Ingrese únicamente valores alfabéticos y guiones',
-        'alpha_numeric': 'Ingrese únicamente valores alfabéticos y numéricos',
-        'alpha_numeric_space': 'Ingrese únicamente valores alfabéticos, numéricos y espacios',
-        'alpha_numeric_punct': 'Ingrese únicamente valores alfabéticos, numéricos y los siguientes signos de puntuación: ~ ! # $ % & * - _ + = | : .',
-        'decimal': 'Ingrese únicamente valores decimales',
-        'hexadecimal': 'Ingrese únicamente valores hexadecimales',
-        'integer': 'Ingrese únicamente valores enteros',
-        'min_length': 'Ingrese al menos {0} caracteres',
-        'max_length': 'Ingrese como máximo {0} caracteres',
-        'required': 'Este campo es requerido',
-        'min_length_files': 'Seleccione al menos {0} archivos',
-        'max_length_files': 'Seleccione máximo {0} archivos',
-        'max_size': 'Cada archivo debe pesar como máximo {0} Mb. El archivo {1} supera el límite.',
-        'valid_email': 'Ingrese una dirección de correo electrónico valida'
-    },
-    'en': {
-        'alpha': 'Enter alphabetic values only',
-        'alpha_space': 'Enter alphabetic values and spaces only',
-        'alpha_dash': 'Enter alphabetic values and dashes only',
-        'alpha_numeric': 'Enter alphabetic and numeric values only',
-        'alpha_numeric_space': 'Enter alphabetic, numeric, and spaces values only',
-        'alpha_numeric_punct': 'Enter alphabetic and numeric values, and the following symbols: ~ ! # $ % & * - _ + = | : . only',
-        'decimal': 'Enter decimal values only',
-        'hexadecimal': 'Enter hexadecimal values only',
-        'integer': 'Enter integer values only',
-        'min_length': 'Enter at least {0} characters',
-        'max_length': 'Enter maximum {0} characters',
-        'required': 'This field is required',
-        'min_length_files': 'Select at least {0} files',
-        'max_length_files': 'Select maximum {0} files',
-        'max_size': 'Each file must weigh maximum {0} Mb. The file {1} exceeds the limit',
-        'valid_email': 'Enter a valid email address'
-    },
-};
-
-const parametersRegex = new RegExp(/\[(.*?)\]/);
-
 class VValidation {
     constructor(id, settings) {
         this.form = document.getElementById(id);
@@ -73,6 +18,66 @@ class VValidation {
         for (let key in settings) this[key] = settings[key];
         this.validateAll(false);
         this.attachEventHandlers();
+    }
+
+    static rulesPack () {
+        return {
+            'alpha': /^[a-zA-Z]+$/,
+            'alpha_space': /^[a-zA-Z\s]+$/,
+            'alpha_dash': /^[a-zA-Z_]+$/,
+            'alpha_numeric': /^[a-zA-Z0-9]+$/,
+            'alpha_numeric_space': /^[a-zA-Z0-9\s]+$/,
+            'alpha_numeric_punct': /^[a-zA-Z0-9\~\!\#\$\%\&\*\-\_\+\=\|\:\.]+$/,
+            'decimal': /^[-+]?\d+(?:[,.]\d+)*$/,
+            'hexadecimal': /^[0-9a-fA-F]+$/,
+            'integer': /^[0-9]+$/,
+            'valid_email': /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        };
+    }
+
+    static errors() {
+        return {
+            'es': {
+                'alpha': 'Ingrese únicamente valores alfabéticos',
+                'alpha_space': 'Ingrese únicamente valores alfabéticos y espacios',
+                'alpha_dash': 'Ingrese únicamente valores alfabéticos y guiones',
+                'alpha_numeric': 'Ingrese únicamente valores alfabéticos y numéricos',
+                'alpha_numeric_space': 'Ingrese únicamente valores alfabéticos, numéricos y espacios',
+                'alpha_numeric_punct': 'Ingrese únicamente valores alfabéticos, numéricos y los siguientes signos de puntuación: ~ ! # $ % & * - _ + = | : .',
+                'decimal': 'Ingrese únicamente valores decimales',
+                'hexadecimal': 'Ingrese únicamente valores hexadecimales',
+                'integer': 'Ingrese únicamente valores enteros',
+                'min_length': 'Ingrese al menos {0} caracteres',
+                'max_length': 'Ingrese como máximo {0} caracteres',
+                'required': 'Este campo es requerido',
+                'min_length_files': 'Seleccione al menos {0} archivos',
+                'max_length_files': 'Seleccione máximo {0} archivos',
+                'max_size': 'Cada archivo debe pesar como máximo {0} Mb. El archivo {1} supera el límite.',
+                'valid_email': 'Ingrese una dirección de correo electrónico valida'
+            },
+            'en': {
+                'alpha': 'Enter alphabetic values only',
+                'alpha_space': 'Enter alphabetic values and spaces only',
+                'alpha_dash': 'Enter alphabetic values and dashes only',
+                'alpha_numeric': 'Enter alphabetic and numeric values only',
+                'alpha_numeric_space': 'Enter alphabetic, numeric, and spaces values only',
+                'alpha_numeric_punct': 'Enter alphabetic and numeric values, and the following symbols: ~ ! # $ % & * - _ + = | : . only',
+                'decimal': 'Enter decimal values only',
+                'hexadecimal': 'Enter hexadecimal values only',
+                'integer': 'Enter integer values only',
+                'min_length': 'Enter at least {0} characters',
+                'max_length': 'Enter maximum {0} characters',
+                'required': 'This field is required',
+                'min_length_files': 'Select at least {0} files',
+                'max_length_files': 'Select maximum {0} files',
+                'max_size': 'Each file must weigh maximum {0} Mb. The file {1} exceeds the limit',
+                'valid_email': 'Enter a valid email address'
+            },
+        };
+    }
+
+    static parametersRegex(){
+        return new RegExp(/\[(.*?)\]/);
     }
 
     attachEventHandlers() {
@@ -183,12 +188,12 @@ class VValidation {
                 if (type !== '') {
                     let parameterValue = '';
                     try {
-                        parameterValue = parametersRegex.exec(rule)[0];
+                        parameterValue = VValidation.parametersRegex.exec(rule)[0];
                         parameterValue = parameterValue.substr(1, parameterValue.length-2);
                     } catch (e) {
                         throw new Error(`The ${type}_length's parameter could not be read. Please check you are using the following syntax: ${type}_length[INTEGER_VALUE]`);
                     }
-                    if (parameterValue.match(new RegExp(rulesPack['integer'])) || (type === 'max_size' && parameterValue.match(new RegExp(rulesPack['decimal'])))) {
+                    if (parameterValue.match(new RegExp(VValidation.rulesPack['integer'])) || (type === 'max_size' && parameterValue.match(new RegExp(VValidation.rulesPack['decimal'])))) {
 
                         if(el.nodeName.toLowerCase() === 'input' && el.getAttribute("type") === 'file'){
                             parameterValue = parseFloat(parameterValue);
@@ -196,14 +201,14 @@ class VValidation {
                                 if(el.files.length < parameterValue){
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, (errors[this.lang].min_length_files.replace('{0}', parameterValue)));
+                                        this.showMessage(el, (VValidation.errors[this.lang].min_length_files.replace('{0}', parameterValue)));
                                     }
                                 }
                             }else if(type === 'max'){
                                 if(el.files.length > parameterValue){
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, (errors[this.lang].max_length_files.replace('{0}', parameterValue)));
+                                        this.showMessage(el, (VValidation.errors[this.lang].max_length_files.replace('{0}', parameterValue)));
                                     }
                                 }
                             }else {
@@ -212,7 +217,7 @@ class VValidation {
                                     if(f_size > parameterValue){
                                         this.isValid = false;
                                         if (displayMessages) {
-                                            this.showMessage(el, (errors[this.lang].max_size.replace('{0}', parameterValue)).replace('{1}',file.name));
+                                            this.showMessage(el, (VValidation.errors[this.lang].max_size.replace('{0}', parameterValue)).replace('{1}',file.name));
                                         }
                                     }
                                 });
@@ -226,14 +231,14 @@ class VValidation {
                                 if (value.length < parameterValue && !rules.includes('permit_empty')) {
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, (errors[this.lang].min_length.replace('{0}', parameterValue)));
+                                        this.showMessage(el, (VValidation.errors[this.lang].min_length.replace('{0}', parameterValue)));
                                     }
                                 }
                             } else {
                                 if (value.length > parameterValue) {
                                     this.isValid = false;
                                     if (displayMessages) {
-                                        this.showMessage(el, errors[this.lang].max_length.replace('{0}', parameterValue));
+                                        this.showMessage(el, VValidation.errors[this.lang].max_length.replace('{0}', parameterValue));
                                     }
                                 }
                             }
@@ -246,15 +251,15 @@ class VValidation {
                     /**
                      * The rule is not a length check. Let's try finding the rule in rulesPack object
                      * */
-                    if (rulesPack.hasOwnProperty(rule)) {
+                    if (VValidation.rulesPack.hasOwnProperty(rule)) {
                         /**
                          * rule exists, so we create a new Regex and check if it matches the input value.
                          * If the regex does not match the value we assign isValid to false;
                          * */
-                        if (!(new RegExp(rulesPack[rule]).test(value)) && !rules.includes('permit_empty')) {
+                        if (!(new RegExp(VValidation.rulesPack[rule]).test(value)) && !rules.includes('permit_empty')) {
                             this.isValid = false;
                             if(displayMessages){
-                               this.showMessage(el, errors[this.lang][rule]);
+                               this.showMessage(el, VValidation.errors[this.lang][rule]);
                             }
                         }
                     }
@@ -269,7 +274,7 @@ class VValidation {
                 if ((el.getAttribute("type") === 'file' && el.files.length < 1) || value.length < 1) {
                     this.isValid = false;
                     if(displayMessages){
-                        this.showMessage(el, errors[this.lang].required);
+                        this.showMessage(el, VValidation.errors[this.lang].required);
                     }
                 }
 
