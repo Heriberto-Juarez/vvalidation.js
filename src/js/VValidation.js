@@ -18,6 +18,13 @@ class VValidation {
         for (let key in settings) this[key] = settings[key];
         this.validateAll(false);
         this.attachEventHandlers();
+        this.promise = null;
+        this.doneFn = function () {
+
+        };
+        this.failedFn = function () {
+
+        };
     }
 
     static rulesPack () {
@@ -122,6 +129,7 @@ class VValidation {
                 }
             }else if (this.isEnabled && this.handleFormSubmission){
                 this.ajax().then((response) => {
+                    this.doneFn(response);
                     try {
                         let r = JSON.parse(response);
                         this.processJSONResponse(r);
@@ -130,11 +138,21 @@ class VValidation {
                         throw new Error(e);
                     }
                 }).catch((e) => {
-                    alert(e);
+                    this.failedFn(e);
                     throw new Error(e);
                 });
             }
         });
+    }
+
+    done(fn) {
+        this.doneFn = fn;
+        return this;
+    }
+
+    failed(fn){
+        this.failedFn = fn;
+        return this;
     }
 
     validateAndUpdate(el, displayMessages) {
