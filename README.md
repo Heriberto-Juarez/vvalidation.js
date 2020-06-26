@@ -1,6 +1,6 @@
 # VValidation.js
 This is a vanilla javascript validation library by Heriberto Juárez. Created with the purpose of making 
-people's life's better (mine too), while avoiding the use of heavy libraries that have a lot of 
+people's life better (mine too), while avoiding the use of heavy libraries that have a lot of 
 dependencies, or that are not giving you the experience you want or need.
 
 ![image](https://user-images.githubusercontent.com/20604217/85223218-dd6b2e80-b386-11ea-9ea0-6a6f7fdacf94.png)
@@ -10,7 +10,7 @@ dependencies, or that are not giving you the experience you want or need.
 * File validation
 * Inputs validation (input, textarea,...)
 * Languages support (English and Spanish supported)
-* Lightweight (Currently: The final script is less than 8 KB)
+* Lightweight (Currently: The final script's size is 8.25 KB)
 * Easy to implement
 * Compatible with bootstrap 5
 * Show modals if available
@@ -232,3 +232,24 @@ The next step is to make use of our powerful json and in the server return somet
 
 Now every time you will be able to not only return messages that are added after inputs but also 
 you will be able to display messages in bootstrap 5 modals.
+
+**3. Do something with responses from server:**
+Now you are able to receive the responses from server by applying .done or .failed 
+to the instance you created. 
+
+Here is an example that expects a response from server with 
+the next format:  {redirect: 'https://example.com'}
+
+Note: This is only available if `handleFormSubmission` is true.
+By default, it's value is true.
+
+    new VValidation('myForm', {
+        'lang': 'es'
+    }).done(function (response) {
+        //If response contains redirect property then we go there
+        if(response.hasOwnProperty("redirect")){
+            window.location = response.redirect;
+        }
+    }).failed(function (e) {
+        console.log('Failed', e);
+    });
