@@ -131,7 +131,7 @@ class VValidation {
                 this.ajax().then((response) => {
                     try {
                         let r = JSON.parse(response);
-                        this.doneFn(response);
+                        this.doneFn(r);
                         this.processJSONResponse(r);
                     }catch (e) {
                         alert(e);
