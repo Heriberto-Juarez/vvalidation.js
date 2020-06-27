@@ -129,9 +129,9 @@ class VValidation {
                 }
             }else if (this.isEnabled && this.handleFormSubmission){
                 this.ajax().then((response) => {
-                    this.doneFn(response);
                     try {
                         let r = JSON.parse(response);
+                        this.doneFn(response);
                         this.processJSONResponse(r);
                     }catch (e) {
                         alert(e);
