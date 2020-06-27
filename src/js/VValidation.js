@@ -373,16 +373,7 @@ class VValidation {
                 url: this.form.getAttribute("action"),
                 data: new FormData(this.form)
             };
-
-            const files = this.form.querySelectorAll("[type='file']");
-            files.forEach((element) => {
-                if(element.hasAttribute("name") && element.name.length > 0){
-                    Array.from(element.files).forEach((file) => {
-                        ajaxSettings.data.append(element.name, file);
-                    });
-                }
-            });
-
+            
             for (let key in settings){
                 ajaxSettings[key] = settings[key];
             }
